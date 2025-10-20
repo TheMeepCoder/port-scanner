@@ -1,9 +1,10 @@
 # Network Scanner
 
 ## Group Members
-- [Name 1]
-- [Name 2]
-- [Name 3]
+- [Linea]
+- [Linus]
+- [Mattias]
+- [Strumpan?]
 
 ## Description
 [Brief description of what your network scanner does]
