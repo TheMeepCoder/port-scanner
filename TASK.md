@@ -118,7 +118,7 @@ Port 80: ÖPPEN
 2. **Förloppsindikator:** Visa skanningsförlopp (t.ex. "Skannar port 45/100")
 3. **Spara resultat:** Skriv resultat till en textfil
 4. **Flera värdar:** Skanna flera IP-adresser från en lista
-5. **Färgad utdata:** Använd färger för att markera öppna portar (undersök `colorama`-biblioteket)
+5. **Färgad utdata:** Använd färger för att markera öppna portar(undersök`colorama`-biblioteket)
 6. **Skanningshastighetsalternativ:** Snabb, normal eller grundlig läge
 
 **Exempel på god användarupplevelse:**
@@ -149,7 +149,7 @@ Resultat sparade i scan_results.txt
 
 **Testchecklista:**
 
-- [ ] Testa på scanme.nmap.org
+- [✔️] Testa på scanme.nmap.org
 - [ ] Testa med giltiga och ogiltiga IP-adresser
 - [ ] Testa med ogiltiga portintervall
 - [ ] Testa felhantering (vad händer om internet är frånkopplat?)
