@@ -13,57 +13,46 @@ Date: [20-10-2025]
 import socket
 import sys
 
-
-
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.settimeout(2)
-target = input('What you want to scan?: ')
-
-# getting the ip address using gethostbyname
-# function
-t_IP = socket.gethostbyname(target)
-print("Starting scan on host: ", t_IP)
-
-
-def port_scan(port):
+def is_port_open(host: str, port: int, timeout: float = 1.0) -> bool:
+    #Return true if port is open, else false
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: #with function closes after it's done
+        s.settimeout(timeout)
+        try:
+            s.connect((host, port))
+            return True
+        except (socket.timeout, ConnectionRefusedError, OSError):
+            return False
+        
+def get_service_name(port: int) -> str:
+    #adtempt to identify sverice of given port
     try:
-        s.connect((t_IP, port))
-        return True
-    except:
-        print("connection failed")
-        return False
-
-
-choice = int(input("do you wish to scan 1. a single or 2. multiple ports?" ))
-
-def port_scan_single():
-
+        return socket.getservbyport(port)
+    except OSError:
+        return "unknown"
+    
+def scan_single_port(host: str):
     port = int(input("Enter the port number to be scanned: "))
-
-    if port_scan(port):
-        print('Port', port, 'is open')
+    if is_port_open(host, port):
+        print(f"Port {port} is open. Service: {get_service_name(port)}")
     else:
-        print("port", port, "is closed")
+        print(f"Port {port} is closed or cannot be reached.")
 
-def port_scan_multi():
-    port = int(input("which port? "))
-    inter = int(input("how many ports? "))
-    port_inter = port + inter
-
-    for port in range(port, port_inter):
-        if port_scan(port):
-            print(f"port {port} is open")
+def scan_multi_ports(host: str, start_port: int, end_port: int):
+    for port in range(start_port, end_port + 1):
+        if is_port_open(host, port):
+            print(f"Port {port} is open. Service: {get_service_name(port)}")
         else:
-            print(f"port {port} is closed")
+            print(f"Port {port} is closed or cannot be reached.")
 
-if choice == 1:
-    port_scan_single()
-elif choice == 2:
-    port_scan_multi()
-
-
-
-s.close()
 
 if __name__ == "__main__":
-    pass
+    host = input("Host to scan(ip or hostname, default localhost) or localhost ")
+    
+    choice = int(input("1. scan a single or 2. scan multiple? "))
+    if choice == 1:
+        scan_single_port(host)
+    elif choice == 2:
+        start_port = int(input("Enter start port number: "))
+        end_port = int(input("Enter end port number: "))
+        scan_multi_ports(host, start_port, end_port)
+        
