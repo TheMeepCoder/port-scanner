@@ -128,3 +128,48 @@ Port 22 is open. Service: ssh. Time: 2025-11-06 14:51:37
 Port 23 is closed. Service: telnet. Time: 2025-11-06 14:51:37
 Port 24 is closed. Service: unknown. Time: 2025-11-06 14:51:37
 Port 25 is closed. Service: smtp. Time: 2025-11-06 14:51:38
+Port 22 is open. Service: ssh. Time: 2025-11-07 09:08:08
+Port 20 is closed. Service: ftp-data. Time: 2025-11-07 11:11:13
+Port 21 is closed. Service: ftp. Time: 2025-11-07 11:11:13
+Port 22 is open. Service: ssh. Time: 2025-11-07 11:11:13
+Port 23 is closed. Service: telnet. Time: 2025-11-07 11:11:14
+Port 24 is closed. Service: unknown. Time: 2025-11-07 11:11:14
+Port 25 is closed. Service: smtp. Time: 2025-11-07 11:11:15
+Port 26 is closed. Service: unknown. Time: 2025-11-07 11:11:15
+Port 27 is closed. Service: unknown. Time: 2025-11-07 11:11:15
+Port 28 is closed. Service: unknown. Time: 2025-11-07 11:11:16
+Port 29 is closed. Service: unknown. Time: 2025-11-07 11:11:16
+Port 30 is closed. Service: unknown. Time: 2025-11-07 11:11:16
+Port 20 is closed. Service: ftp-data. Time: 2025-11-07 11:12:57
+-------Port 21 is closed. Service: ftp. Time: 2025-11-07 11:12:57
+-------Port 22 is open. Service: ssh. Time: 2025-11-07 11:12:58
+-------Port 23 is closed. Service: telnet. Time: 2025-11-07 11:12:58
+-------Port 20 is closed. Service: ftp-data. Time: 2025-11-07 11:14:10
+Port 20 is closed. Service: ftp-data. Time: 2025-11-07 11:14:29
+Port 20 is closed. Service: ftp-data. Time: 2025-11-07 11:14:35
+Port 20 is closed. Service: ftp-data. Time: 2025-11-07 11:16:01
+-------
+Port 21 is closed. Service: ftp. Time: 2025-11-07 11:16:02
+-------
+Port 22 is open. Service: ssh. Time: 2025-11-07 11:16:02
+-------
+Port 23 is closed. Service: telnet. Time: 2025-11-07 11:16:02
+-------
+Port 20 is closed. Service: ftp-data. Time: 2025-11-07 11:17:55
+-------
+Port 21 is closed. Service: ftp. Time: 2025-11-07 11:17:55
+-------
+Port 22 is open. Service: ssh. Time: 2025-11-07 11:17:56
+-------
+Port 23 is closed. Service: telnet. Time: 2025-11-07 11:17:56
+-------
+Port 20 is closed. Service: ftp-data. Time: 2025-11-07 11:21:20. Hostname/IP:scanme.nmap.org
+-------
+Port 21 is closed. Service: ftp. Time: 2025-11-07 11:21:20. Hostname/IP:scanme.nmap.org
+-------
+Port 22 is open. Service: ssh. Time: 2025-11-07 11:21:20. Hostname/IP:scanme.nmap.org
+-------
+Port 23 is closed. Service: telnet. Time: 2025-11-07 11:21:21. Hostname/IP:scanme.nmap.org
+-------
+Port 33 is closed. Service: unknown. Time: 2025-11-07 11:22:41. Hostname/IP:scanme.nmap.org
+-------

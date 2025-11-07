@@ -1,36 +1,42 @@
 # Network Scanner
 
 ## Group Members
-- [Name 1]
-- [Name 2]
-- [Name 3]
+
+- [Linea]
+- [Linus]
+- [MattiasLavsund]
+- [Magnus]
 
 ## Description
-[Brief description of what your network scanner does]
+
+[This portscanner allows you to scan a destination host and a range of ports. Checks what port are open and what service are connected to it. Results are log in a .txt file]
 
 ## Installation
-```bash
-# Install dependencies (if needed)
-pip install -r requirements.txt
-```
+
+Python 3.6+
+PowerShell
+Visual Studio Code
+
 
 ## Usage
-```bash
-# How to run your scanner
-python network_scanner.py
-```
+
+In VS code terminal write python3 network_scanner.py
 
 ## Features
-- [ ] Single port check
-- [ ] Multi-port scanning
-- [ ] Service identification
-- [ ] [Additional features you implemented]
+
+- [x] Single port check
+- [x] Multi-port scanning
+- [x] Service identification
+- [] [Additional features you implemented]
 
 ## Testing
-[Describe how you tested your scanner and what the results were]
+
+[We tested the portscanner on localhost and scanme.nmap.org, for single and multiple ports, result showed open/closed ports and service. Created a logfile with timestamp.]
 
 ## Known Limitations
-[Any limitations or known issues]
+
+[Unable to scan multiple IPs at the same time, Unable to read if a port are closed or filtered, Unable to scan multiple specific ports ex. port 22,80,443 only]
 
 ## What We Learned
-[Key takeaways from the project]
+
+[Dont scan ports that you dont have premission to. We have discovered how to use the socket library]

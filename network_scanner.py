@@ -56,11 +56,12 @@ def get_service_name(port: int) -> str:
     except OSError: # OSError means when it cannot find any value
         return "unknown"
     
-def log_result(port: int, service: str, is_open: bool):
+def log_result(port: int, service: str, is_open: bool, host: str):
     #logs result into a txt file
     with open("results.txt", "a") as file:  # Open in append mode, which adds new lines for each scanned port
         status = "open" if is_open else "closed"
-        file.write(f"Port {port} is {status}. Service: {service}. Time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        file.write(f"Port {port} is {status}. Service: {service}. Time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}. Hostname/IP:{host}\n")
+        file.write("-------\n")
     
 def scan_single_port(host: str):
     port = int(input("Enter the port number to be scanned: "))
@@ -68,12 +69,13 @@ def scan_single_port(host: str):
     service = get_service_name(port)
     status = "open" if is_open else "closed"
     light_status = "🟢" if is_open else "🔴"
-    log_result(port, service, is_open)  # calls funtion to Log the result and sends the value of the varibles
+    log_result(port, service, is_open, host)  # calls funtion to Log the result and sends the value of the varibles
 
     print(f"{light_status} Port {port} is {status}. Service: {service}.")
+    print("-------")
     
     print("results have been saved in results.txt")
-    
+    print("-------")
 
 def scan_multi_ports(host: str, start_port: int, end_port: int):
     #Scan a range of ports between start_port and end_port
@@ -82,19 +84,25 @@ def scan_multi_ports(host: str, start_port: int, end_port: int):
         service = get_service_name(port)
         status = "open" if is_open else "closed"
         light_status = "🟢" if is_open else "🔴"
-        log_result(port, service, is_open)  # calls funtion to Log the result and sends the value of the varibles
+        log_result(port, service, is_open, host)  # calls funtion to Log the result and sends the value of the varibles
 
         print(f"{light_status} Port {port} is {status}. Service: {service}.")
+        print("-------")
     
     print("Results have been saved in results.txt")
+    print("-------")
 
 
 #if __name__ == "__main__": # "user interface" added only if using other files to pull values, otherwise not needed
+print("Remeber to ONLY scan on networks you have permission to")
+print("-------")
 host = validate_host("Host to scan(ip or hostname, default localhost) or localhost: ") # Asks user for IP/Hostname, otheriwise defaults to localhost
+print("-------")
 
 while True:
     try: 
-        choice = int(input("1. scan a single or 2. scan multiple?: "))
+        choice = int(input("Select scanning mode: (1) Single-port (2) Multi-port: "))
+        print("-------")
         
         if choice == 1:
             scan_single_port(host)
@@ -106,7 +114,9 @@ while True:
             break
         else:
             print("Invailed input. Please enter 1 or 2")
+            print("-------")
     except ValueError:
         print("Invailed input. Please enter a number")
+        print("-------")
 
         
