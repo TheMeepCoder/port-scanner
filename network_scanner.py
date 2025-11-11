@@ -18,7 +18,7 @@ import datetime # logs time
 with open("results.txt", "a") as file:  # "a" adds "w" wipes
     file.write("") #import txt file and allows writing in it 
 
-def is_port_open(host: str, port: int, timeout: float = 1.0) -> bool: # "->" just what is expected, dosen't do anything on it's without an import. here it just acts like a simple comment
+def is_port_open(host: str, port: int, timeout: float = 1.0) -> bool: # "->" just what is expected, dosen't do anything on it's without an mypy libarey, same with the classes. here it just acts like a simple comment
     #Return True if port is open, else False
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: # the with statement closes connection after it's done scaning which is after it has printed out the last port in the treminal and txt
         s.settimeout(timeout) # sets a timeout of 1 secound

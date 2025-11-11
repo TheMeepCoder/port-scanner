@@ -76,3 +76,5 @@ Port 8080 is closed. Service: http-alt. Time: 2025-11-10 10:13:58. Hostname/IP:1
 -------
 🔴Port 25 is closed. Service: smtp. Time: 2025-11-10 10:37:39. Hostname/IP:scanme.nmap.org
 -------
+🔴Port 30 is closed. Service: unknown. Time: 2025-11-11 09:40:15. Hostname/IP: scanme.nmap.org
+-------
