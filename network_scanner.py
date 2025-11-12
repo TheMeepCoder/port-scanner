@@ -58,7 +58,7 @@ def get_service_name(port: int) -> str:
 def log_result(port: int, service: str, state: str, host: str):
     #logs result into a txt file
     with open("results.txt", "a") as file:
-        light_status = {"open": "🟢", "closed": "🔴", "filterd": "⚫"}.get(state, "❔")  # Open in append mode, which adds new lines for each scanned port
+        light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")  # Open in append mode, which adds new lines for each scanned port
         file.write(f"{light_status}Port {port} is {state}. Service: {service}. Time: {datetime.datetime.now().strftime('%H:%M:%S')}. Hostname/IP: {host}\n")
         file.write("-------\n")
     
@@ -66,7 +66,7 @@ def scan_single_port(host: str):
     port = int(input("Enter the port number to be scanned: "))
     state = is_port_open(host, port)
     service = get_service_name(port)
-    light_status = {"open": "🟢", "closed": "🔴", "filterd": "⚫"}.get(state, "❔")
+    light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")
     log_result(port, service, state, host)  # calls funtion to Log the result and sends the value of the varibles
 
     print(f"{light_status} Port {port} is {state}. Service: {service}.")
@@ -80,7 +80,7 @@ def scan_multi_ports(host: str, start_port: int, end_port: int):
     for port in range(start_port, end_port + 1): # 
         state = is_port_open(host, port)
         service = get_service_name(port)
-        light_status = {"open": "🟢", "closed": "🔴", "filterd": "⚫"}.get(state, "❔")
+        light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")
         log_result(port, service, state, host)  # calls funtion to Log the result and sends the value of the varibles
 
         print(f"{light_status} Port {port} is {state}. Service: {service}.")
@@ -130,7 +130,7 @@ def sum_scan():
     unknown_count = 0
     spinner = ["|", "/", "-","\\"]
 
-    for i, port in enumerate(range(start_port, end_port + 1), start=1):
+    for i, port in enumerate(range(start_port, end_port + 1), start = 1):
         try:
             state = is_port_open(host, port)
             if state == "open":
@@ -158,6 +158,38 @@ def sum_scan():
         file.write("-------\n")
     print("summery has been logged to results.txt")
 
+def quick_scan():
+    print("Disclaimer! this mode will not log to any txt file, only print out in terminal!")
+    print("-------")
+    host = validate_host("Host to scan (ip or hostname): ") # Asks user for IP/Hostname
+    print("-------")
+
+    while True:
+        try: 
+            choice = int(input("Select scanning mode: (1) Single-port (2) Multi-port: "))
+            print("-------")
+            if choice == 1:
+                port = int(input("Enter the port number to be scanned: "))
+                state = is_port_open(host, port)
+                light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")
+                print(f"{light_status} Port {port} is {state}")
+                break
+            elif choice == 2:
+                start_port = int(input("Enter start port number: "))
+                end_port = int(input("Enter end port number: "))
+
+                for port in range(start_port, end_port + 1):
+                    state = is_port_open(host, port)
+                    state = is_port_open(host, port)
+                    light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")
+                    print(f"{light_status} Port {port} is {state}")
+                break
+            else:
+                print("Input out of range")
+        except ValueError:
+            print("invailed input")
+    
+
 def test_localhost():
     pass
 
@@ -168,7 +200,8 @@ def menu():
         print("Pick yhe selection between 1 to 3")
         print("1. Normal Scan")
         print("2. Summery Scan")
-        print("3. Test Localhost")
+        print("3. Quick scan")
+        print("4. Test Localhost")
         print("-------")
         try:
             selection = int(input(""))
@@ -178,7 +211,10 @@ def menu():
             elif selection == 2:
                 sum_scan()
                 break
-            elif selection == 3:
+            elif selection ==3:
+                quick_scan()
+                break
+            elif selection == 4:
                 test_localhost()
                 break
             else:
