@@ -15,6 +15,7 @@ import ipaddress # import to help validate IP format
 import socket # allows the program to create network sockets, connect to host:port, and look up serivce names
 import datetime # logs time 
 import sys # adds a little flair
+import time
 
 def is_port_open(host: str, port: int, timeout: float = 1.0) -> str: # "->" just what is expected, dosen't do anything on it's without an mypy libarey, same with the classes. here it just acts like a simple comment
     #Return True if port is open, else False
@@ -119,11 +120,46 @@ def normal_scan():
             print("-------")
 
 
-def quick_scan():
-    print("meep")
+def sum_scan():
+    host = validate_host("Host to scan (ip or hostname): ")
+    start_port = int(input("which port would you like to start on?: "))
+    end_port = int(input("which port would you like to end on?: "))
+    open_count = 0
+    closed_count = 0
+    filtered_count = 0
+    unknown_count = 0
+    spinner = ["|", "/", "-","\\"]
+
+    for i, port in enumerate(range(start_port, end_port + 1), start=1):
+        try:
+            state = is_port_open(host, port)
+            if state == "open":
+                open_count += 1
+            elif state == "closed":
+                closed_count += 1
+            elif state == "filtered":
+                filtered_count += 1
+            else:
+                unknown_count += 1
+        except Exception:
+            unknown_count += 1
+
+        total_count = open_count + closed_count + filtered_count + unknown_count
+        spin_char = spinner[i % len(spinner)]
+        sys.stdout.write(f"\r{spin_char} Scanning ... {total_count - 1}/{end_port - start_port}")
+        sys.stdout.flush()
+        time.sleep(0.05)
+                
+    print(f"\n Scan Summery: 🟢 Open ports: {open_count} | 🔴 Closed ports: {closed_count} | ⚫ Filtered ports: {filtered_count} | ❔ Unknown errors: {unknown_count}")
+
+    with open("results.txt", "a") as file:
+        file.write(f"Scan done on {host} at {datetime.datetime.now().strftime('%Y-%m-%d')}\n")
+        file.write(f"Scan Summery: 🟢 Open ports: {open_count} | 🔴 Closed ports: {closed_count} | ⚫ Filtered ports: {filtered_count} | ❔ Unknown errors: {unknown_count}\n ")
+        file.write("-------\n")
+    print("summery has been logged to results.txt")
 
 def test_localhost():
-    print("eep")
+    pass
 
 def menu():
     print("🛑Remeber to ONLY scan on networks you have permission to🛑")
@@ -131,7 +167,7 @@ def menu():
         print("-------")
         print("Pick yhe selection between 1 to 3")
         print("1. Normal Scan")
-        print("2. Quick Scan")
+        print("2. Summery Scan")
         print("3. Test Localhost")
         print("-------")
         try:
@@ -140,7 +176,7 @@ def menu():
                 normal_scan()
                 break
             elif selection == 2:
-                quick_scan()
+                sum_scan()
                 break
             elif selection == 3:
                 test_localhost()
@@ -175,8 +211,7 @@ TODO:
 dynamic sys loading bar
 localhost test option
 qucik scan option
-summery
 timer
 
 """
-#DONE: filtered service state
+#DONE: filtered service state, summery
