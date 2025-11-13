@@ -16,6 +16,36 @@ import socket # allows the program to create network sockets, connect to host:po
 import datetime # logs time 
 import sys # adds a little flair
 import time
+import threading
+
+stop_animation = threading.Event()
+
+
+# animation
+
+def spin_ani():
+    spinner = ["🌕", "🌖", "🌗", "🌘","🌑", "🌒", "🌓","🌔"] #🌚
+    i = 0
+    while not stop_animation.is_set():
+        sys.stdout.write(f"\r{spinner[i % len(spinner)]} Scanning...")
+        sys.stdout.flush()
+        i += 1
+        time.sleep(0.1)
+
+
+    
+"""def count_up():
+    count = 0
+    while not stop_animation.is_set():
+        sys.stdout.write("\n")
+        sys.stdout.write(f"\033[KPorts scanned: {count}")
+        sys.stdout.flush()
+        count += 1
+        time.sleep(0.2)
+"""
+
+def timer_ani():
+    pass
 
 def is_port_open(host: str, port: int, timeout: float = 1.0) -> str: # "->" just what is expected, dosen't do anything on it's without an mypy libarey, same with the classes. here it just acts like a simple comment
     #Return True if port is open, else False
@@ -128,9 +158,13 @@ def sum_scan():
     closed_count = 0
     filtered_count = 0
     unknown_count = 0
-    spinner = ["|", "/", "-","\\"]
 
-    for i, port in enumerate(range(start_port, end_port + 1), start = 1):
+    t1 = threading.Thread(target=spin_ani)
+    #t2 = threading.Thread(target=count_up)
+    t1.start()
+    #t2.start()
+
+    for port in range(start_port, end_port + 1):
         try:
             state = is_port_open(host, port)
             if state == "open":
@@ -143,20 +177,20 @@ def sum_scan():
                 unknown_count += 1
         except Exception:
             unknown_count += 1
-
-        total_count = open_count + closed_count + filtered_count + unknown_count
-        spin_char = spinner[i % len(spinner)]
-        sys.stdout.write(f"\r{spin_char} Scanning ... {total_count - 1}/{end_port - start_port}")
-        sys.stdout.flush()
-        time.sleep(0.05)
                 
-    print(f"\n Scan Summery: 🟢 Open ports: {open_count} | 🔴 Closed ports: {closed_count} | ⚫ Filtered ports: {filtered_count} | ❔ Unknown errors: {unknown_count}")
+    stop_animation.set()
+    t1.join()
+    #t2.join()
+    sys.stdout.write("\r" + " " * 40 + "\r")
 
+    print(f"\nScan Summery: 🟢 Open ports: {open_count} | 🔴 Closed ports: {closed_count} | ⚫ Filtered ports: {filtered_count} | ❔ Unknown errors: {unknown_count}")
+    print("-------")
     with open("results.txt", "a") as file:
         file.write(f"Scan done on {host} at {datetime.datetime.now().strftime('%Y-%m-%d')}\n")
         file.write(f"Scan Summery: 🟢 Open ports: {open_count} | 🔴 Closed ports: {closed_count} | ⚫ Filtered ports: {filtered_count} | ❔ Unknown errors: {unknown_count}\n ")
         file.write("-------\n")
     print("summery has been logged to results.txt")
+    print("-------")
 
 def quick_scan():
     print("Disclaimer! this mode will not log to any txt file, only print out in terminal!")
@@ -177,7 +211,7 @@ def quick_scan():
             elif choice == 2:
                 start_port = int(input("Enter start port number: "))
                 end_port = int(input("Enter end port number: "))
-
+                
                 for port in range(start_port, end_port + 1):
                     state = is_port_open(host, port)
                     state = is_port_open(host, port)
@@ -246,8 +280,7 @@ close_program()
 TODO: 
 dynamic sys loading bar
 localhost test option
-qucik scan option
 timer
 
 """
-#DONE: filtered service state, summery
+#DONE: filtered service state, summery, qucik scan option
