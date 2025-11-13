@@ -19,36 +19,32 @@ import time
 import threading
 
 stop_animation = threading.Event()
+scanned_count = 0
+total_ports = 0
 
-
+timer_running = threading.Event()
+elapsed_time = 0.0
 # animation
 
-def spin_ani():
+def moon_spinner_With_counter():
     spinner = ["🌕", "🌖", "🌗", "🌘","🌑", "🌒", "🌓","🌔"] #🌚
     i = 0
     while not stop_animation.is_set():
-        sys.stdout.write(f"\r{spinner[i % len(spinner)]} Scanning...")
+        sys.stdout.write(f"\r{spinner[i % len(spinner)]} Scanning... Ports scanned: ({scanned_count}/{total_ports})")
         sys.stdout.flush()
         i += 1
         time.sleep(0.1)
-
-
     
-"""def count_up():
-    count = 0
-    while not stop_animation.is_set():
-        sys.stdout.write("\n")
-        sys.stdout.write(f"\033[KPorts scanned: {count}")
-        sys.stdout.flush()
-        count += 1
-        time.sleep(0.2)
-"""
 
 def timer_ani():
-    pass
+    global elapsed_time
+    start_time = time.time()
+    while not timer_running.is_set():
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+
 
 def is_port_open(host: str, port: int, timeout: float = 1.0) -> str: # "->" just what is expected, dosen't do anything on it's without an mypy libarey, same with the classes. here it just acts like a simple comment
-    #Return True if port is open, else False
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: # the with statement closes connection after it's done scaning which is after it has printed out the last port in the treminal and txt
         s.settimeout(timeout) # sets a timeout of 1 secound
         try:
@@ -58,7 +54,7 @@ def is_port_open(host: str, port: int, timeout: float = 1.0) -> str: # "->" just
             return "closed"
         except (ConnectionRefusedError, OSError):
             return "filtered"
-
+#core funtions
 def validate_host(prompt: str = "Host to scan (IP or hostname): ") -> str:
     #Prompt until a valid IP address or hostname is provided; return to host.
     while True:
@@ -91,7 +87,7 @@ def log_result(port: int, service: str, state: str, host: str):
         light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")  # Open in append mode, which adds new lines for each scanned port
         file.write(f"{light_status}Port {port} is {state}. Service: {service}. Time: {datetime.datetime.now().strftime('%H:%M:%S')}. Hostname/IP: {host}\n")
         file.write("-------\n")
-    
+# selection
 def scan_single_port(host: str):
     port = int(input("Enter the port number to be scanned: "))
     state = is_port_open(host, port)
@@ -149,40 +145,52 @@ def normal_scan():
             print("Invailed input. Please enter a number")
             print("-------")
 
-
 def sum_scan():
+    global scanned_count, total_ports, elapsed_time
+    stop_animation.clear()
+
     host = validate_host("Host to scan (ip or hostname): ")
     start_port = int(input("which port would you like to start on?: "))
     end_port = int(input("which port would you like to end on?: "))
-    open_count = 0
-    closed_count = 0
-    filtered_count = 0
-    unknown_count = 0
+    scanned_count = 0
+    open_count = closed_count = filtered_count = unknown_count = 0
+    total_ports = end_port - start_port + 1
 
-    t1 = threading.Thread(target=spin_ani)
-    #t2 = threading.Thread(target=count_up)
+    timer_running.clear()
+    elapsed_time = 0.0
+    t_timer = threading.Thread(target=timer_ani)
+    t_timer.start()
+
+    t1 = threading.Thread(target=moon_spinner_With_counter)
     t1.start()
-    #t2.start()
 
     for port in range(start_port, end_port + 1):
         try:
             state = is_port_open(host, port)
             if state == "open":
                 open_count += 1
+                scanned_count += 1
             elif state == "closed":
                 closed_count += 1
+                scanned_count += 1
             elif state == "filtered":
                 filtered_count += 1
+                scanned_count += 1
             else:
                 unknown_count += 1
+                scanned_count += 1
         except Exception:
             unknown_count += 1
+            scanned_count += 1
                 
     stop_animation.set()
     t1.join()
-    #t2.join()
-    sys.stdout.write("\r" + " " * 40 + "\r")
+    sys.stdout.write("\r" + " " * 60 + "\r")  # Clear line
 
+    timer_running.set()
+    t_timer.join()
+
+    print(f"Scan completed in {elapsed_time:.2f} secounds.")
     print(f"\nScan Summery: 🟢 Open ports: {open_count} | 🔴 Closed ports: {closed_count} | ⚫ Filtered ports: {filtered_count} | ❔ Unknown errors: {unknown_count}")
     print("-------")
     with open("results.txt", "a") as file:
@@ -207,6 +215,7 @@ def quick_scan():
                 state = is_port_open(host, port)
                 light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")
                 print(f"{light_status} Port {port} is {state}")
+                print("-------")
                 break
             elif choice == 2:
                 start_port = int(input("Enter start port number: "))
@@ -217,16 +226,16 @@ def quick_scan():
                     state = is_port_open(host, port)
                     light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")
                     print(f"{light_status} Port {port} is {state}")
+                    print("-------")
                 break
             else:
                 print("Input out of range")
         except ValueError:
             print("invailed input")
     
-
 def test_localhost():
     pass
-
+# user interface
 def menu():
     print("🛑Remeber to ONLY scan on networks you have permission to🛑")
     while True:
@@ -278,9 +287,7 @@ close_program()
 
 """
 TODO: 
-dynamic sys loading bar
 localhost test option
-timer
-
+more threading uses
 """
-#DONE: filtered service state, summery, qucik scan option
+#DONE: filtered service state, summery, quick scan option, dynamic sys loading bar, timer
