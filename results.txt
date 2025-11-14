@@ -1,12 +1,1 @@
-Scan done on scanme.nmap.org at 2025-11-13
-Scan Summery: 🟢 Open ports: 1 | 🔴 Closed ports: 1 | ⚫ Filtered ports: 9 | ❔ Unknown errors: 0
- -------
-Scan done on scanme.nmap.org at 2025-11-13
-Scan Summery: 🟢 Open ports: 0 | 🔴 Closed ports: 0 | ⚫ Filtered ports: 20 | ❔ Unknown errors: 0
- -------
-Scan done on scanme.nmap.org at 2025-11-13
-Scan Summery: 🟢 Open ports: 0 | 🔴 Closed ports: 0 | ⚫ Filtered ports: 20 | ❔ Unknown errors: 0
- -------
-Scan done on scanme.nmap.org at 2025-11-13
-Scan Summery: 🟢 Open ports: 1 | 🔴 Closed ports: 1 | ⚫ Filtered ports: 48 | ❔ Unknown errors: 0
- -------
+

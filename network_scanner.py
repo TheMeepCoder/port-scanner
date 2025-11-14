@@ -24,6 +24,7 @@ total_ports = 0
 
 timer_running = threading.Event()
 elapsed_time = 0.0
+
 # animation
 
 def moon_spinner_With_counter():
@@ -43,6 +44,7 @@ def timer_ani():
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
 
+#core funtions
 
 def is_port_open(host: str, port: int, timeout: float = 1.0) -> str: # "->" just what is expected, dosen't do anything on it's without an mypy libarey, same with the classes. here it just acts like a simple comment
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: # the with statement closes connection after it's done scaning which is after it has printed out the last port in the treminal and txt
@@ -54,7 +56,7 @@ def is_port_open(host: str, port: int, timeout: float = 1.0) -> str: # "->" just
             return "closed"
         except (ConnectionRefusedError, OSError):
             return "filtered"
-#core funtions
+
 def validate_host(prompt: str = "Host to scan (IP or hostname): ") -> str:
     #Prompt until a valid IP address or hostname is provided; return to host.
     while True:
@@ -88,8 +90,7 @@ def log_result(port: int, service: str, state: str, host: str):
         file.write(f"{light_status}Port {port} is {state}. Service: {service}. Time: {datetime.datetime.now().strftime('%H:%M:%S')}. Hostname/IP: {host}\n")
         file.write("-------\n")
 # selection
-def scan_single_port(host: str):
-    port = int(input("Enter the port number to be scanned: "))
+def scan_single_port(host: str, port: int):
     state = is_port_open(host, port)
     service = get_service_name(port)
     light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")
@@ -97,9 +98,7 @@ def scan_single_port(host: str):
 
     print(f"{light_status} Port {port} is {state}. Service: {service}.")
     print("-------")
-    
-    print("results have been saved in results.txt")
-    print("-------")
+
 
 def scan_multi_ports(host: str, start_port: int, end_port: int):
     #Scan a range of ports between start_port and end_port
@@ -115,20 +114,50 @@ def scan_multi_ports(host: str, start_port: int, end_port: int):
     print("Results have been saved in results.txt")
     print("-------")
 
+def scan_specific_port(host):
+    spesifed_ports = []
+    choice = "y"
+    count = 1
+
+    while True:
+        try:
+            if choice == "y":
+                num = int(input(f"Type in the number for Port({count}): "))
+                print("-------")
+                spesifed_ports.append(num)
+                count += 1
+                choice = input("do you want to add another port?(y/n):")
+                print("-------")
+            elif choice == "n":
+                break
+            else:
+                choice = input("invailed input, type in either y for yes or n for no")
+                print("-------")
+        except ValueError:
+            choice = input("invailed input, type in either y for yes or n for no")
+            print("-------")
+
+    for port in spesifed_ports:
+        scan_single_port(host, port)
+
 def normal_scan():
+    global elapsed_time
     host = validate_host("Host to scan (ip or hostname): ") # Asks user for IP/Hostname
     print("-------")
 
     while True:
         try: 
-            choice = int(input("Select scanning mode: (1) Single-port (2) Multi-port: "))
+            choice = int(input("Select scanning mode: (1) Single-port (2) Multi-port (3) Specific ports: "))
             print("-------")
             
             if choice == 1:
                 with open("results.txt", "a") as file:
                     file.write(f"Scan done to {host} at {datetime.datetime.now().strftime('%Y-%m-%d')}\n")
                     file.write("-------\n")
-                scan_single_port(host)
+                port = int(input("Enter the port number to be scanned: ")) # might need to move this
+                scan_single_port(host, port)
+                print("results have been saved in results.txt")
+                print("-------")
                 break
             elif choice == 2:
                 with open("results.txt", "a") as file:
@@ -137,6 +166,14 @@ def normal_scan():
                 start_port = int(input("Enter start port number: "))
                 end_port = int(input("Enter end port number: "))
                 scan_multi_ports(host, start_port, end_port)
+                break
+            elif choice == 3:
+                with open("results.txt", "a") as file:
+                    file.write(f"Scan done to {host} at {datetime.datetime.now().strftime('%Y-%m-%d')}\n")
+                    file.write("-------\n")
+                scan_specific_port(host)
+                print("results have been saved in results.txt")
+                print("-------")
                 break
             else:
                 print("Invailed input. Please enter 1 or 2")
@@ -201,6 +238,7 @@ def sum_scan():
     print("-------")
 
 def quick_scan():
+    global elapsed_time
     print("Disclaimer! this mode will not log to any txt file, only print out in terminal!")
     print("-------")
     host = validate_host("Host to scan (ip or hostname): ") # Asks user for IP/Hostname
@@ -210,6 +248,12 @@ def quick_scan():
         try: 
             choice = int(input("Select scanning mode: (1) Single-port (2) Multi-port: "))
             print("-------")
+
+            timer_running.clear()
+            elapsed_time = 0.0
+            t_timer = threading.Thread(target=timer_ani)
+            t_timer.start()
+
             if choice == 1:
                 port = int(input("Enter the port number to be scanned: "))
                 state = is_port_open(host, port)
@@ -218,6 +262,11 @@ def quick_scan():
                 print("-------")
                 break
             elif choice == 2:
+                timer_running.clear()
+                elapsed_time = 0.0
+                t_timer = threading.Thread(target=timer_ani)
+                t_timer.start()
+
                 start_port = int(input("Enter start port number: "))
                 end_port = int(input("Enter end port number: "))
                 
@@ -232,9 +281,61 @@ def quick_scan():
                 print("Input out of range")
         except ValueError:
             print("invailed input")
+    timer_running.set()
+    t_timer.join()
+    print(f"Scan completed in {elapsed_time:.2f} secounds.")
     
 def test_localhost():
-    pass
+    print("⚠️  Note: Localhost scans may show all ports as 'filtered' or 'closed' if:")
+    print("- No services are running on the tested ports")
+    print("- Your firewall is blocking or silently dropping connections")
+    print("- Your system is configured to ignore local probes")
+    print("To get more accurate results, you may temporarily:")
+    print("- Disable your firewall (if safe to do so)")
+    print("- Start a local service (e.g., `python -m http.server 8080`)")
+    print("-------")
+    proceed = input("Would you like to continue with the localhost scan? (y/n): ").lower()
+    if proceed != "y":
+        print("Scan cancelled.")
+        return
+
+
+    global scanned_count, total_ports, elapsed_time
+    stop_animation.clear()
+
+    host = "127.0.0.1"
+    print("Scanning localhost...(127.0.0.1)")
+    print("-------")
+
+    t1 = threading.Thread(target=moon_spinner_With_counter)
+    t1.start()
+
+    ports_to_test =[22, 80, 443, 3306, 8080]
+    total_ports = len(ports_to_test)
+
+    open_count = closed_count = filtered_count = 0
+    for port in ports_to_test:
+        state = is_port_open(host, port)
+        light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")
+        print(f"{light_status} Port {port} is {state}")
+        if state == "open":
+            open_count += 1
+            scanned_count += 1
+        elif state == "closed":
+            closed_count += 1
+            scanned_count += 1
+        elif state == "filtered":
+            filtered_count += 1
+            scanned_count += 1
+
+    stop_animation.set()
+    t1.join()
+    sys.stdout.write("\r" + " " * 60 + "\r")  # Clear line
+
+    print("-------")
+    print(f"Localhost Summary: 🟢 {open_count} open | 🔴 {closed_count} closed | ⚫ {filtered_count} filtered")
+    print("-------")
+
 # user interface
 def menu():
     print("🛑Remeber to ONLY scan on networks you have permission to🛑")
@@ -274,7 +375,7 @@ def close_program():
                 menu()
             elif done == "n":
                 print("-------")
-                print("Thank you for using my port scanner")
+                print("Thank you for using Lunar Port Scanner")
                 break
             else:
                 print("invailed input, type either in (y) for yes or (n) for no")
@@ -287,7 +388,10 @@ close_program()
 
 """
 TODO: 
-localhost test option
 more threading uses
+add more text to clreify what each selection does
+ASCII Art
+threading multiple ports
+maybe banner
 """
-#DONE: filtered service state, summery, quick scan option, dynamic sys loading bar, timer
+#DONE: filtered service state, summery, quick scan option, dynamic sys loading bar, timer, spesific range, localhost test option
