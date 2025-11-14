@@ -19,6 +19,8 @@ import time
 import threading
 
 stop_animation = threading.Event()
+scanned_count_lock = threading.Lock()
+
 scanned_count = 0
 total_ports = 0
 
@@ -336,6 +338,111 @@ def test_localhost():
     print(f"Localhost Summary: 🟢 {open_count} open | 🔴 {closed_count} closed | ⚫ {filtered_count} filtered")
     print("-------")
 
+def threaded_host_scan(host: str, start_port: int, end_port: int, results: dict):
+    global scanned_count
+    open_count = closed_count = filtered_count = unknown_count = 0
+    for port in range(start_port, end_port + 1):
+        try:
+            state = is_port_open(host, port)
+            if state == "open":
+                open_count += 1
+            elif state == "closed":
+                closed_count += 1
+            elif state == "filtered":
+                filtered_count += 1
+            else: 
+                unknown_count += 1
+        except Exception:
+            unknown_count += 1
+        
+        with scanned_count_lock:
+            scanned_count += 1
+
+    results[host] = {
+        "open": open_count,
+        "closed": closed_count,
+        "filtered": filtered_count,
+        "unknown": unknown_count
+    }
+    with open("results.txt", "a") as file:
+        file.write(f"Port range scanned: {start_port}-{end_port}\n")
+        file.write(f"Scan Summery: 🟢 Open ports: {open_count} | 🔴 Closed ports: {closed_count} | ⚫ Filtered ports: {filtered_count} | ❔ Unknown errors: {unknown_count}\n ")
+        file.write("-------\n")
+
+def multi_host_scan():
+    global scanned_count, total_ports, elapsed_time
+    stop_animation.clear()
+
+    hosts = input("Enter hosts to scan (comma-separacted): "). split(",")
+    hosts = [h.strip() for h in hosts if h.strip()]
+    start_port, end_port = choose_port_range()
+    total_ports = (end_port - start_port) * len(hosts) + 1
+
+    print("Starting multi-host scan...")
+    print("-------")
+
+    results = {}
+    threads = []
+
+    timer_running.clear()
+    elapsed_time = 0.0
+    t_timer = threading.Thread(target=timer_ani)
+    t_timer.start()
+
+    t1 = threading.Thread(target=moon_spinner_With_counter)
+    t1.start()
+
+    for host in hosts:
+        t = threading.Thread(target=threaded_host_scan, args=(host, start_port, end_port, results))
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+    
+    stop_animation.set()
+    t1.join()
+    sys.stdout.write("\r" + " " * 60 + "\r")  # Clear line
+
+    timer_running.set()
+    t_timer.join()
+
+    print(f"Scan completed in {elapsed_time:.2f} secounds.")
+    print("-------")
+    for host, summary in results.items():
+        print(f"🌐 {host} Summary:")
+        print(f"🟢 Open: {summary['open']} | 🔴 Closed: {summary['closed']} | ⚫ Filtered: {summary['filtered']} | ❔ Unknown: {summary['unknown']}")
+        print("-------")
+    print("Summery has been saved into a txt file")
+    print("-------")
+
+
+def choose_port_range():
+    print("Select port range to scan:")
+    print("1. Common ports (1–1024)")
+    print("2. Registered ports (1025–49151)")
+    print("3. Dynamic/private ports (49152–65535)")
+    print("4. Custom range")
+
+    while True:
+        try:
+            choice = int(input("Select port range (1–4): "))
+            if choice == 1:
+                return 1, 1024
+            elif choice == 2:
+                return 1025, 49151
+            elif choice == 3:
+                return 49152, 65535
+            elif choice == 4:
+                start = int(input("Enter start port: "))
+                end = int(input("Enter end port: "))
+                return start, end
+            else:
+                print("Invalid choice. Please select 1–4.")
+        except ValueError:
+            print("Please enter a number.")
+
+
 # user interface
 def menu():
     print("🛑Remeber to ONLY scan on networks you have permission to🛑")
@@ -344,8 +451,9 @@ def menu():
         print("Pick yhe selection between 1 to 3")
         print("1. Normal Scan")
         print("2. Summery Scan")
-        print("3. Quick scan")
+        print("3. Quick Scan")
         print("4. Test Localhost")
+        print("5. Multi-host Summery Scan")
         print("-------")
         try:
             selection = int(input(""))
@@ -360,6 +468,9 @@ def menu():
                 break
             elif selection == 4:
                 test_localhost()
+                break
+            elif selection == 5:
+                multi_host_scan()
                 break
             else:
                 print("input out of range, pick a number between 1-3")
@@ -388,10 +499,8 @@ close_program()
 
 """
 TODO: 
-more threading uses
 add more text to clreify what each selection does
 ASCII Art
-threading multiple ports
 maybe banner
 """
-#DONE: filtered service state, summery, quick scan option, dynamic sys loading bar, timer, spesific range, localhost test option
+#DONE: filtered service state, summery, quick scan option, dynamic sys loading bar, timer, spesific range, localhost test option, threading multiple ports

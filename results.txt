@@ -1,1 +1,19 @@
 
+Port range scanned: 1-50
+Scan Summery: 🟢 Open ports: 0 | 🔴 Closed ports: 0 | ⚫ Filtered ports: 50 | ❔ Unknown errors: 0
+ -------
+Port range scanned: 1-50
+Scan Summery: 🟢 Open ports: 1 | 🔴 Closed ports: 1 | ⚫ Filtered ports: 48 | ❔ Unknown errors: 0
+ -------
+Port range scanned: 1-1024
+Scan Summery: 🟢 Open ports: 0 | 🔴 Closed ports: 0 | ⚫ Filtered ports: 1024 | ❔ Unknown errors: 0
+ -------
+Port range scanned: 1-1024
+Scan Summery: 🟢 Open ports: 2 | 🔴 Closed ports: 14 | ⚫ Filtered ports: 1008 | ❔ Unknown errors: 0
+ -------
+Port range scanned: 1-1024
+Scan Summery: 🟢 Open ports: 0 | 🔴 Closed ports: 0 | ⚫ Filtered ports: 1024 | ❔ Unknown errors: 0
+ -------
+Port range scanned: 1-1024
+Scan Summery: 🟢 Open ports: 0 | 🔴 Closed ports: 0 | ⚫ Filtered ports: 1024 | ❔ Unknown errors: 0
+ -------
