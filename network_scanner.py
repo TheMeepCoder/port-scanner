@@ -16,7 +16,7 @@ import socket # allows the program to create network sockets, connect to host:po
 import datetime # logs time 
 import sys # adds a little flair
 import time
-import threading
+import threading # multitasking
 
 stop_animation = threading.Event()
 scanned_count_lock = threading.Lock()
@@ -91,6 +91,38 @@ def log_result(port: int, service: str, state: str, host: str):
         light_status = {"open": "🟢", "closed": "🔴", "filtered": "⚫"}.get(state, "❔")  # Open in append mode, which adds new lines for each scanned port
         file.write(f"{light_status}Port {port} is {state}. Service: {service}. Time: {datetime.datetime.now().strftime('%H:%M:%S')}. Hostname/IP: {host}\n")
         file.write("-------\n")
+
+def threaded_host_scan(host: str, start_port: int, end_port: int, results: dict):
+    global scanned_count
+    open_count = closed_count = filtered_count = unknown_count = 0
+    for port in range(start_port, end_port + 1):
+        try:
+            state = is_port_open(host, port)
+            if state == "open":
+                open_count += 1
+            elif state == "closed":
+                closed_count += 1
+            elif state == "filtered":
+                filtered_count += 1
+            else: 
+                unknown_count += 1
+        except Exception:
+            unknown_count += 1
+        
+        with scanned_count_lock:
+            scanned_count += 1
+
+    results[host] = {
+        "open": open_count,
+        "closed": closed_count,
+        "filtered": filtered_count,
+        "unknown": unknown_count
+    }
+    with open("results.txt", "a") as file:
+        file.write(f"Port range scanned: {start_port}-{end_port}\n")
+        file.write(f"Scan Summery: 🟢 Open ports: {open_count} | 🔴 Closed ports: {closed_count} | ⚫ Filtered ports: {filtered_count} | ❔ Unknown errors: {unknown_count}\n ")
+        file.write("-------\n")
+
 # selection
 def scan_single_port(host: str, port: int):
     state = is_port_open(host, port)
@@ -128,7 +160,7 @@ def scan_specific_port(host):
                 print("-------")
                 spesifed_ports.append(num)
                 count += 1
-                choice = input("do you want to add another port?(y/n):")
+                choice = input("do you want to add another port?(y/n):").lower()
                 print("-------")
             elif choice == "n":
                 break
@@ -144,6 +176,9 @@ def scan_specific_port(host):
 
 def normal_scan():
     global elapsed_time
+    print("Mode selected: Normal Scan")
+    print("Normal scan lets you either scan a single ip, a range or a few spesific. \ninfomation of the port's state and serivce will be printed in the terminal and into a text file")
+    print("-------")
     host = validate_host("Host to scan (ip or hostname): ") # Asks user for IP/Hostname
     print("-------")
 
@@ -165,8 +200,7 @@ def normal_scan():
                 with open("results.txt", "a") as file:
                     file.write(f"Scan done to {host} at {datetime.datetime.now().strftime('%Y-%m-%d')}\n")
                     file.write("-------\n")
-                start_port = int(input("Enter start port number: "))
-                end_port = int(input("Enter end port number: "))
+                start_port, end_port = choose_port_range()
                 scan_multi_ports(host, start_port, end_port)
                 break
             elif choice == 3:
@@ -188,6 +222,8 @@ def sum_scan():
     global scanned_count, total_ports, elapsed_time
     stop_animation.clear()
 
+    print("Mode Selected: Summery Scan")
+    print("Summery scan scans a range of ports and prints out the summery of the opperative state of the ports.\nwill be printed out both in terminal and in a txt")
     host = validate_host("Host to scan (ip or hostname): ")
     start_port = int(input("which port would you like to start on?: "))
     end_port = int(input("which port would you like to end on?: "))
@@ -241,7 +277,8 @@ def sum_scan():
 
 def quick_scan():
     global elapsed_time
-    print("Disclaimer! this mode will not log to any txt file, only print out in terminal!")
+    print("Mode Selected: Quick Scan")
+    print("Quick Scan will only scan the opertive state of the inputed port. \nDisclaimer! this mode will not log to any txt file, only print out in terminal!")
     print("-------")
     host = validate_host("Host to scan (ip or hostname): ") # Asks user for IP/Hostname
     print("-------")
@@ -288,19 +325,12 @@ def quick_scan():
     print(f"Scan completed in {elapsed_time:.2f} secounds.")
     
 def test_localhost():
-    print("⚠️  Note: Localhost scans may show all ports as 'filtered' or 'closed' if:")
-    print("- No services are running on the tested ports")
-    print("- Your firewall is blocking or silently dropping connections")
-    print("- Your system is configured to ignore local probes")
-    print("To get more accurate results, you may temporarily:")
-    print("- Disable your firewall (if safe to do so)")
-    print("- Start a local service (e.g., `python -m http.server 8080`)")
+    print("⚠️  Note: Localhost scans may show all ports as 'filtered' or 'closed' if:\n- No services are running on the tested ports\n- Your firewall is blocking or silently dropping connections\n- Your system is configured to ignore local probes\nTo get more accurate results, you may temporarily:\n- Disable your firewall (if safe to do so)\n- Start a local service (e.g., `python -m http.server 8080`)\n")
     print("-------")
     proceed = input("Would you like to continue with the localhost scan? (y/n): ").lower()
     if proceed != "y":
         print("Scan cancelled.")
         return
-
 
     global scanned_count, total_ports, elapsed_time
     stop_animation.clear()
@@ -338,41 +368,12 @@ def test_localhost():
     print(f"Localhost Summary: 🟢 {open_count} open | 🔴 {closed_count} closed | ⚫ {filtered_count} filtered")
     print("-------")
 
-def threaded_host_scan(host: str, start_port: int, end_port: int, results: dict):
-    global scanned_count
-    open_count = closed_count = filtered_count = unknown_count = 0
-    for port in range(start_port, end_port + 1):
-        try:
-            state = is_port_open(host, port)
-            if state == "open":
-                open_count += 1
-            elif state == "closed":
-                closed_count += 1
-            elif state == "filtered":
-                filtered_count += 1
-            else: 
-                unknown_count += 1
-        except Exception:
-            unknown_count += 1
-        
-        with scanned_count_lock:
-            scanned_count += 1
-
-    results[host] = {
-        "open": open_count,
-        "closed": closed_count,
-        "filtered": filtered_count,
-        "unknown": unknown_count
-    }
-    with open("results.txt", "a") as file:
-        file.write(f"Port range scanned: {start_port}-{end_port}\n")
-        file.write(f"Scan Summery: 🟢 Open ports: {open_count} | 🔴 Closed ports: {closed_count} | ⚫ Filtered ports: {filtered_count} | ❔ Unknown errors: {unknown_count}\n ")
-        file.write("-------\n")
-
 def multi_host_scan():
     global scanned_count, total_ports, elapsed_time
     stop_animation.clear()
 
+    print("Mode Selected: Multi Host Scan")
+    print("Multi Host Scans allows the scanning of multiple hosts at the same timein a given range.\nafter which will print out a summery of the opperative state of the rnage of port\nresults will be printed out in terminal and logged to a txt file")
     hosts = input("Enter hosts to scan (comma-separacted): "). split(",")
     hosts = [h.strip() for h in hosts if h.strip()]
     start_port, end_port = choose_port_range()
@@ -481,7 +482,7 @@ def close_program():
         
     while True:
         try:
-            done = input("do you want to go back to selection?(y/n): ")
+            done = input("do you want to go back to selection?(y/n): ").lower()
             if done == "y":
                 menu()
             elif done == "n":
